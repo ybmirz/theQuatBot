@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TheQuatBot": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false,
+      "nativeDebugging": false
+    }
+  }
+}
