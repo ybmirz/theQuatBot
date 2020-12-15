@@ -107,13 +107,11 @@ namespace TheQuatBot
         }
 
         //command executed log
-        
         private Task Command_CommandExecuted(CommandExecutionEventArgs e)
         {
             e.Context.Client.DebugLogger.LogMessage(LogLevel.Info, "TheQuatBot", $"Hoe {e.Context.User.Username} successfully executed {e.Command.Name}", DateTime.Now);
             return Task.CompletedTask;
         }
-
 
         //command error log
         private async Task Command_CommandError(CommandErrorEventArgs e)

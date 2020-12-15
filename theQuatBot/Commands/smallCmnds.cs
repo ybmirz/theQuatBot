@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using TheQuatBot.Services;
 
 namespace TheQuatBot.Commands
@@ -484,6 +485,39 @@ namespace TheQuatBot.Commands
             }.WithFooter($"Ping {ctx.Client.Ping} ms {emoji}");
 
             await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        //timer command / reminder
+        static int seconds = 0;
+        [Command("remind"), Description("Reminder/Timer Command with 2 digits as the integer")]    
+        public async Task remind(CommandContext ctx, [RemainingText, Description("With the format [int]h [int]m [int]s")] string str = null)
+        {
+            //setting a timer elapsed
+            seconds = 0;
+            System.Timers.Timer _timer = new System.Timers.Timer();
+            _timer.Interval = 1000;
+            _timer.Elapsed += new ElapsedEventHandler(onTimerEvent);
+
+            str = str.ToLower();
+            var words = str.Split(" ");
+
+            string hours = "0", mins = "0", scnds = "0";
+            foreach (string word in words)
+            {
+                if (word.Contains("h")) { hours = string.Concat(word.Take<char>(2)); }
+                if (word.Contains("m")) { mins = string.Concat(word.Take<char>(2)); }
+                if (word.Contains("s")) { scnds = string.Concat(word.Take<char>(2)); }
+            }
+            var hrs = Int32.Parse(hours);
+            var min = Int32.Parse(mins);
+            seconds = Int32.Parse(scnds);
+
+            //finish this lmfao
+
+        }
+        private static void onTimerEvent(object source, ElapsedEventArgs e)
+        {
+            seconds++;
         }
 
         [Command("test")]
