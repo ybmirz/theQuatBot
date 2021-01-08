@@ -1,9 +1,11 @@
 ﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace TheQuatBot.Services
 {
@@ -67,6 +69,45 @@ namespace TheQuatBot.Services
         }
 
     }
+
+    //custom user model ()
+    public class CustomUser
+    {
+        public string Name { get; set; }
+        public ulong Id { get; set; }
+    }
+    
+    //custom user converter (Currently not in use)
+    public class CustomUserConverter : IArgumentConverter<CustomUser>
+    {
+        private DiscordMemberConverter _discordMemberConverter;
+        public CustomUserConverter()
+        {
+            _discordMemberConverter = new DiscordMemberConverter();
+        }
+        private CustomUser DiscordMemberToCustomUser(DiscordMember discordMember)
+        {
+            var customUser = new CustomUser();
+            customUser.Name = discordMember.Username;
+            customUser.Id = discordMember.Id;
+            return customUser;
+        }
+        //public bool TryConvert(string value, CommandContext context, out CustomUser customUser)
+        //{
+        //    //First, we convert the user input (value) to a DiscordMember
+        //    DiscordMember discordMember;
+        //    var result = _discordMemberConverter.TryConvert(value, context, out discordMember);
+        //    //Then, convert the DiscordMember to our CustomUser
+        //    customUser = DiscordMemberToCustomUser(discordMember);
+        //    return result;
+        //}
+
+        public Task<Optional<CustomUser>> ConvertAsync(string value, CommandContext ctx)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public enum EmbedType
     {
         Default,

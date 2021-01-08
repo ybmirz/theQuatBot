@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using Microsoft.VisualBasic;
 using System;
@@ -19,6 +20,8 @@ namespace TheQuatBot.Commands
     {
         public static DateTime startTime;
     }
+    
+
     public class TryCommands : BaseCommandModule
     {
         private Random rnd = new Random();
@@ -64,30 +67,9 @@ namespace TheQuatBot.Commands
         }
 
         [Command("slap"), Description("Simple slap command, returns a slap img")]
-        public async Task Slap(CommandContext ctx, [Description("who you'd like to slap [minimum of 3 letters]")] string name, [Description("[Optional] Message to be sent with the slap (with _ as spaces)")] [RemainingText] string msg = null)
+        public async Task Slap(CommandContext ctx, [Description("who you'd like to slap ID or discord mention")] DiscordMember user, [Description("[Optional] Message to be sent with the slap (with _ as spaces)")] [RemainingText] string msg = null)
         {
-            DiscordMember member = null; //will output executor if code doesnt work
-
-            //az as hitler condition
-            if (string.Compare("adolf", name.ToLower()) == 0 || string.Compare("hitler", name.ToLower()) == 0)
-            {
-                name = "azreal";
-            }
-
-            var users = new Dictionary<ulong, DiscordMember>(ctx.Guild.Members);
-            await ctx.TriggerTypingAsync();
-            foreach (KeyValuePair<ulong, DiscordMember> member1 in users)
-            {
-                if (member1.Value.Nickname != null)
-                {
-                    if (string.Compare(Strings.Left(member1.Value.Nickname.ToLower(), 3), Strings.Left(name.ToLower(), 3)) == 0)
-                    {
-                        member = member1.Value;
-                    }                    
-                }
-            }
-            
-
+            DiscordMember member = user; //will output executor if code doesnt work
             await ctx.TriggerTypingAsync();
 
             //adding if to check if the executor inputted proper nickname
@@ -290,6 +272,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("8ball"), Description("Asking the magic 8ball life questions [Not Responsible for any improper decisions taken from this]")]
+        [Aliases("8")]
         public async Task ball(CommandContext ctx,[RemainingText] string args = null)
         {
             var sb = new StringBuilder();
@@ -532,13 +515,9 @@ namespace TheQuatBot.Commands
             await ctx.TriggerTypingAsync();
             foreach (KeyValuePair<ulong, DiscordMember> member1 in users)
             {
-                if (member1.Value.Nickname != null)
-                {
-                    if (string.Compare(Strings.Left(member1.Value.Nickname.ToLower(), 3), Strings.Left(str.ToLower(), 3)) == 0)
-                    {
-                        await ctx.Channel.SendMessageAsync(member1.Value.Username);
-                    }
-                }
+              
+                await ctx.Channel.SendMessageAsync($"{member1.Key} [{member1.Value.Username}]");
+                
             }
 
         }

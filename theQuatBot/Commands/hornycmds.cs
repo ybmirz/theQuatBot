@@ -19,28 +19,10 @@ namespace TheQuatBot.Commands
     {
         // cmnds here can be just executed with ;sth
         [GroupCommand()]
-        public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText, Description("Name of horny person")] string name)
+        public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Name of horny person")] DiscordMember member = null)
         {
-            DiscordMember member = null;
-
-            if (name != null)
-            {
-                var users = new Dictionary<ulong, DiscordMember>(ctx.Guild.Members);
-                await ctx.TriggerTypingAsync();
-                foreach (KeyValuePair<ulong, DiscordMember> member1 in users)
-                {
-                    if (member1.Value.Nickname != null)
-                    {
-                        if (string.Compare(Strings.Left(member1.Value.Nickname.ToLower(), 3), Strings.Left(name.ToLower(), 3)) == 0)
-                        {
-                            member = member1.Value; //change the output you want here
-                        }
-                    }
-                }
-            }
             var rnd = new Random();
             var next = rnd.Next(0, 6);
-
             switch (next)
             {
                 case 0:

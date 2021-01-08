@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using TheQuatBot.Commands;
+using TheQuatBot.Services;
 
 namespace TheQuatBot
 {
@@ -60,6 +61,7 @@ namespace TheQuatBot
             Commands.CommandExecuted += Command_CommandExecuted;
             Commands.CommandErrored += Command_CommandError;
 
+        
             Commands.RegisterCommands<TryCommands>();
             Commands.RegisterCommands<hornycmds>();
 
@@ -73,8 +75,6 @@ namespace TheQuatBot
             Client.MessageCreated += msgCreated;
 
             await Client.ConnectAsync();
-
-
             await Task.Delay(-1);
         }
         //log msgs to console
