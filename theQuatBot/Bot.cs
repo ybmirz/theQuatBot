@@ -61,7 +61,7 @@ namespace TheQuatBot
             Commands.CommandExecuted += Command_CommandExecuted;
             Commands.CommandErrored += Command_CommandError;
 
-        
+            Commands.RegisterCommands<RemindCmds>();
             Commands.RegisterCommands<TryCommands>();
             Commands.RegisterCommands<hornycmds>();
 

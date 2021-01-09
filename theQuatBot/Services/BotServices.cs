@@ -92,6 +92,7 @@ namespace TheQuatBot.Services
             customUser.Id = discordMember.Id;
             return customUser;
         }
+
         //public bool TryConvert(string value, CommandContext context, out CustomUser customUser)
         //{
         //    //First, we convert the user input (value) to a DiscordMember

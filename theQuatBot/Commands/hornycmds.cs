@@ -1,12 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Microsoft.VisualBasic;
+using System;
+using System.Threading.Tasks;
 
 namespace TheQuatBot.Commands
 {
