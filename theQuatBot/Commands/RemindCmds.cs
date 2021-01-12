@@ -5,56 +5,95 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using TheQuatBot.Services;
 using System.Timers;
+using System.Threading;
 
 namespace TheQuatBot.Commands
 {
-    [Group("reminder")]
+    [Group("reminder")] //reminder can be set by anyone in the server along with the reminder cancel can be by anyone [might wanna change later]
     [Description("Reminder commands to set (with overloads) and cancel reminders.")]
     public class RemindCmds : BaseCommandModule
     {
-        // setting variables to be passed thru the entire command group
-        private Timer _timer = new Timer();
-        private DiscordMember _member;
-        private CommandContext _ctx;
-        private string _msg;
-        private DateTime startTime;
-        [Command("set"),Description("Set and Start Timer Reminder with allocated Interval timing")]
-        public async Task Set(CommandContext ctx,[Description("number of seconds to be reminded with")] int scnds, [RemainingText, Description("The message to go with the reminder")] string str = null)
+        List<Remindermodel> reminders = new List<Remindermodel>(); 
+        [Command("set"), Description("Set Reminder using number of Seconds to wait from start time")]
+        public async Task SetSeconds(CommandContext ctx, [Description("Seconds to the Reminder")] int scnds, [RemainingText, Description("The message to go with the reminder")] string msg = null)
         {
-            if (!(_timer.Enabled))
-            {
-                _timer.Interval = scnds * 1000; //setting interval timer with the seconds passed thru the command
-                _ctx = ctx;
-                _member = ctx.Member;
-                _msg = str;
-                _timer.Elapsed += OnTimedEvent;
-                await ctx.RespondAsync($"Reminder for {_member.Mention}, in {scnds} Seconds, with msg \"{_msg}\"").ConfigureAwait(false);
-                startTime = DateTime.Now; //setting a datetime datatype when timer start
-                _timer.Start();
-            }
+            var reminder = new Remindermodel(scnds, msg, ctx);
+            reminder.Set();
+            if (reminder.IsSet)
+            { 
+            await ctx.Channel.SendMessageAsync($"Reminder {reminder.GetHashCode()} has been set for task: `{reminder._msg}` -{ctx.User.Username} in **{scnds}** seconds").ConfigureAwait(false); //can change message here
+            reminders.Add(reminder); } //adding into the list so it's recorded
             else
-            {
-                await ctx.RespondAsync($"A reminder for user {ctx.User} in channel {ctx.Channel.Mention} already exists.").ConfigureAwait(false);
-            }
+                await ctx.Channel.SendMessageAsync("Something went wrong").ConfigureAwait(false);
         }
-        // will be auto restarting for the test and see if the timer works with a running program,, but will change to jsut one event occurence once elapsed is triggered
-        [Command("cancel"), Description("Cancel set timer that has been enabled")]
-        public async Task cancel(CommandContext ctx)
+        [Command("set"), Description("Set Reminder using number of minutes to wait from start time")]
+        public async Task SetMinutes(CommandContext ctx, [Description("Minutes to the Reminder in the form [mm:ss]")] string minDef /*minute Default form*/, [RemainingText, Description("The message to be associated with the reminder")]string msg = null)
         {
-            if (ctx.User == _member)
-            {
-                _timer.Stop();
-                TimeSpan DurationRemaining = DateTime.Now - startTime;
-                await ctx.RespondAsync($"Reminder with message \"{_msg}\" for {_ctx.User.Mention} has been cancelled with {DurationRemaining.Hours}H {DurationRemaining.Minutes}M {DurationRemaining.Seconds}S Remaining").ConfigureAwait(false);
+            int count = 0;
+            int initscnds = 0;
+            foreach (char i in minDef)
+            { 
+                if (i == Char.Parse(":"))
+                {
+                    try
+                    {
+                        initscnds = int.Parse(minDef.Substring(count + 1)); 
+                    }
+                    catch (Exception e) {var tempmsg = await ctx.RespondAsync($"Something went wrong; {e.Message}").ConfigureAwait(false); //if it cant parse this means the command argument was inputted wrongly
+                        Thread.Sleep(1500);
+                        await ctx.Channel.DeleteMessageAsync(tempmsg).ConfigureAwait(false);
+                        return; //exit function code block
+                    }
+                    break; //exits foreach loop cos no need to check next chars
+                }
+                count++; //down here because zero based substring cut
             }
-            else { await ctx.RespondAsync("You have not set a reminder in this channel").ConfigureAwait(false); }
+
+            int min = int.Parse(minDef.Substring(0, count)); //getting the minute and parsing to int
+            int scnds = initscnds + (min * 60); //adding the minutes into seconds
+
+            var reminder = new Remindermodel(scnds, msg, ctx);
+            reminder.Set();
+            if (reminder.IsSet)
+            {
+                await ctx.Channel.SendMessageAsync($"Reminder {reminder.GetHashCode()} has been set for task: `{reminder._msg}` -{ctx.User.Username} in **{minDef}** minutes ({scnds} total seconds)").ConfigureAwait(false); //can change message here
+                reminders.Add(reminder);
+            } //adding into the list so it's recorded
+            else
+                await ctx.Channel.SendMessageAsync("Something went wrong").ConfigureAwait(false);
         }
 
-        private async void OnTimedEvent(object source, ElapsedEventArgs e)
+        /* Things to add:
+         * -manipulate message command so user can change message midway
+         */
+
+        // will be auto restarting for the test and see if the timer works with a running program,, but will change to jsut one event occurence once elapsed is triggered
+        [Command("cancel"), Description("Cancel set timer that has been enabled")]
+        public async Task cancel(CommandContext ctx, [Description("ID of the Reminder")] string ID) //error is being logged to console with InvalidOperationException
         {
-            await _ctx.Channel.SendMessageAsync($"Reminder for: {_ctx.User.Mention} \"{_msg}\" ").ConfigureAwait(false);
-            _timer.Stop();
+            bool reminderFound = false;
+            var now = DateTime.Now;
+            foreach (Remindermodel reminder in reminders)
+            {
+                //add condition for ctx user as well to check if you are the one that did the reminder
+                if (reminder.GetHashCode() == Int32.Parse(ID))
+                {
+                    reminderFound = true;
+                    reminder.Cancel();
+                    var remainingtime = now - reminder.startTime;
+                    if (reminder.IsCancelled) //adbundant code but eh
+                        await ctx.Channel.SendMessageAsync($"Reminder {reminder.GetHashCode()} by has been cancelled, with **{remainingtime.Minutes}:{remainingtime.Seconds}** Minute remaining, with message `{reminder._msg}` ").ConfigureAwait(false);
+                    reminders.Remove(reminder); // shud add user who made the reminder here
+                }
+                // can have abundant code here where there's an else and stating it's false
+            }
+            if (!reminderFound)
+            {
+                await ctx.RespondAsync("Reminder ID not Found").ConfigureAwait(false);
+            }
+
         }
 
        
