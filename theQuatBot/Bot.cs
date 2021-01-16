@@ -20,6 +20,7 @@ namespace TheQuatBot
         public DiscordClient Client { get; private set; }
         private InteractivityExtension Interactivity { get; set; }
         public CommandsNextExtension Commands { get; private set; }
+        
         public async Task RunAsync()
         {
             var json = string.Empty;
@@ -80,7 +81,7 @@ namespace TheQuatBot
         //log msgs to console
         private Task msgCreated(MessageCreateEventArgs e)
         {
-            e.Client.DebugLogger.LogMessage(LogLevel.Info, "TheQuatBot", $"{e.Author.Username} has typed \"{e.Message.Content}\" with ID: {e.Message.Id} in {e.Message.Channel}", DateTime.Now);
+            e.Client.DebugLogger.LogMessage(LogLevel.Info, "TheQuatBot", $"{e.Author.Username} has typed \"{e.Message.Content}\" with ID: {e.Message.Id} in {e.Message.Channel}", DateTime.Now);            
             return Task.CompletedTask;
         }
 

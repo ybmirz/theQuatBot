@@ -1,17 +1,15 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.CommandsNext.Converters;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Entities;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using TheQuatBot.Services;
+using DSharpPlus.Exceptions;
 
 namespace TheQuatBot.Commands
 {
@@ -470,25 +468,14 @@ namespace TheQuatBot.Commands
             await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
         }
 
-
-        [Command("test")]
-        //testing cmd to see how the discordmember works
-        public async Task test(CommandContext ctx, string str)
+        //set up purge command
+        [Command("purge"), Description("Purge above specified amount of messages")]
+        public async Task Purge(CommandContext ctx, [Description("Number of message to delete not including command msg")] int num)
         {
-            
-            //original framework
-            //the comparison to the original nick
-
-            var users = new Dictionary<ulong, DiscordMember>(ctx.Guild.Members);
-            await ctx.TriggerTypingAsync();
-            foreach (KeyValuePair<ulong, DiscordMember> member1 in users)
-            {
-              
-                await ctx.Channel.SendMessageAsync($"{member1.Key} [{member1.Value.Username}]");
-                
-            }
-
+            IEnumerable<DiscordMessage> msgsToDel = await ctx.Channel.GetMessagesAsync(num + 1);
+            await ctx.Channel.DeleteMessagesAsync(msgsToDel).ConfigureAwait(false);
         }
+
 
     }
 }
