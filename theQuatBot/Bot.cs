@@ -65,11 +65,12 @@ namespace TheQuatBot
             Commands.RegisterCommands<RemindCmds>();
             Commands.RegisterCommands<TryCommands>();
             Commands.RegisterCommands<hornycmds>();
+            Commands.RegisterCommands<WallhavenCmds>();
 
             Interactivity = Client.UseInteractivity(new InteractivityConfiguration
-            {
+            { 
                 PaginationBehaviour = PaginationBehaviour.Ignore,
-                Timeout = TimeSpan.FromSeconds(30)
+                Timeout = TimeSpan.FromSeconds(60)
             });
 
             // when a message is created in the guild connected
@@ -117,7 +118,7 @@ namespace TheQuatBot
         //command error log
         private async Task Command_CommandError(CommandErrorEventArgs e)
         {
-            e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "TheQuatBot", $"{e.Context.User.Username} tried to do'{e.Context.Message}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
+            e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "TheQuatBot", $"{e.Context.User.Username} tried to do'{e.Context.Message}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"} | {e.Exception.StackTrace}", DateTime.Now);
 
             //if it's lack of perms
             if (e.Exception is ChecksFailedException ex)

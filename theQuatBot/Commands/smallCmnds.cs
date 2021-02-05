@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TheQuatBot.Services;
 using DSharpPlus.Exceptions;
+using DSharpPlus;
 
 namespace TheQuatBot.Commands
 {
@@ -234,7 +235,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("say"), Description("The bot will repeat whatever you say, and deletes the cmnd msg [Usage: q!say [what you want to say]] if there is an @, reply with a username you'd like to mention")]
-        [RequireRoles(RoleCheckMode.All, "bot dictator")]
+        [RequireRoles(RoleCheckMode.Any, "bot dictator")]
         public async Task say(CommandContext ctx, [RemainingText] [Description("The msg you want the bot to repeat")] string str)
         {
             if (str != null)
@@ -252,7 +253,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("sayto"), Description("The bot will repeat what you say but to a specified channel")]
-        [RequireRoles(RoleCheckMode.All, "bot dictator")]
+        [RequireRoles(RoleCheckMode.Any, "bot dictator")]
         public async Task sayto(CommandContext ctx, [Description("The channel you want to send the msg to")]DiscordChannel chnl, [RemainingText] [Description("Message to be repeated")]string str = null)
         {
             if (str != null)
@@ -469,14 +470,20 @@ namespace TheQuatBot.Commands
         }
 
         //set up purge command
-        [Command("purge"), Description("Purge above specified amount of messages")]
+        [Command("zahando"), Description("Purge above specified amount of messages")]
         public async Task Purge(CommandContext ctx, [Description("Number of message to delete not including command msg")] int num)
         {
             IEnumerable<DiscordMessage> msgsToDel = await ctx.Channel.GetMessagesAsync(num + 1);
             await ctx.Channel.DeleteMessagesAsync(msgsToDel).ConfigureAwait(false);
         }
 
-
+        [Command("choose"), Description("Gives you a somewhat random choice between the words you specify (separated by spaces)")]
+        public async Task Random(CommandContext ctx, [RemainingText, Description("The word choices arguments separated by spaces.")]string input)
+        {
+            Random rnd = new Random();
+            var inputs = input.Split(" ");
+            await ctx.Channel.SendMessageAsync($"I have chosen **{inputs[rnd.Next(0, inputs.Length)]}**.").ConfigureAwait(false);
+        }
     }
 }
 
