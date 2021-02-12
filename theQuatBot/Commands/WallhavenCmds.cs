@@ -2,9 +2,9 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using TheQuatBot.Services;
 
@@ -41,7 +41,7 @@ namespace TheQuatBot.Commands
                             $"**Resolution** = {wallpaper.Resolution}\n" +
                             $"**Ratio** = {wallpaper.Ratio}\n" +
                             $"*[Original Link]({wallpaper.Url})*\n";
-                        var embed = new DiscordEmbedBuilder()
+                            var embed = new DiscordEmbedBuilder()
                             .WithAuthor("theQuatBot", null, "https://media.discordapp.net/attachments/764513313907408926/807343859432423434/voldigoad.PNG")
                             .WithTitle($"**Wallpaper #{count}/{wallpapers.Data.Length}**")
                             .WithDescription(desc)

@@ -2,15 +2,14 @@
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using System.Globalization;
-using System.Collections.Generic;
 
 namespace TheQuatBot.Services
 {
-  
+
     //bot services that we might need to use
     public class BotServices
     {

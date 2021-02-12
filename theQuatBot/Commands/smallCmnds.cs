@@ -1,6 +1,6 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity;
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
@@ -9,8 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TheQuatBot.Services;
-using DSharpPlus.Exceptions;
-using DSharpPlus;
 
 namespace TheQuatBot.Commands
 {
@@ -471,6 +469,7 @@ namespace TheQuatBot.Commands
 
         //set up purge command
         [Command("zahando"), Description("Purge above specified amount of messages")]
+        [Aliases("purge")]
         public async Task Purge(CommandContext ctx, [Description("Number of message to delete not including command msg")] int num)
         {
             IEnumerable<DiscordMessage> msgsToDel = await ctx.Channel.GetMessagesAsync(num + 1);

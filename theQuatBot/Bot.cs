@@ -5,20 +5,22 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using TheQuatBot.Commands;
-using TheQuatBot.Services;
 
 namespace TheQuatBot
 {
     public class Bot
     {
+        private EventId BotEventId = new EventId(420,"theQuatBot");
         public DiscordClient Client { get; private set; }
-        private InteractivityExtension Interactivity { get; set; }
+        public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
         
         public async Task RunAsync()
@@ -35,15 +37,14 @@ namespace TheQuatBot
                 Token = configJson.Token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                LogLevel = LogLevel.Debug,
-                UseInternalLogHandler = true
+                MinimumLogLevel =LogLevel.Warning
             };
 
             Client = new DiscordClient(config);
 
             Client.Ready += OnClientReady;
             //logging for client during runtime
-            Client.GuildAvailable += client_Guildavailable;
+            Client.GuildAvailable += Client_GuildConnected;
             Client.ClientErrored += client_ClientError;
 
             var commandsConfig = new CommandsNextConfiguration
@@ -73,52 +74,44 @@ namespace TheQuatBot
                 Timeout = TimeSpan.FromSeconds(60)
             });
 
-            // when a message is created in the guild connected
-            Client.MessageCreated += msgCreated;
-
             await Client.ConnectAsync();
             await Task.Delay(-1);
         }
-        //log msgs to console
-        private Task msgCreated(MessageCreateEventArgs e)
-        {
-            e.Client.DebugLogger.LogMessage(LogLevel.Info, "TheQuatBot", $"{e.Author.Username} has typed \"{e.Message.Content}\" with ID: {e.Message.Id} in {e.Message.Channel}", DateTime.Now);            
-            return Task.CompletedTask;
-        }
 
         //client is ready
-        private Task OnClientReady(ReadyEventArgs e)
+        private Task OnClientReady(DiscordClient client, ReadyEventArgs e)
         {
             Globals.startTime = DateTime.Now;
-            e.Client.DebugLogger.LogMessage(LogLevel.Info, "TheQuatBot", "Ready for action bitches.", DateTime.Now);
+            client.Logger.LogInformation(BotEventId, $"This bot is ready now bitches Shard: {client.ShardId}");
             return Task.CompletedTask;
         }
 
         //guild connect log
-        private Task client_Guildavailable(GuildCreateEventArgs e)
+        private Task Client_GuildConnected(DiscordClient sender, GuildCreateEventArgs e)
         {
-            e.Client.DebugLogger.LogMessage(LogLevel.Info, "TheQuatBot", $"This Bitch is connected to {e.Guild.Name}.", DateTime.Now);
+            sender.Logger.LogInformation(BotEventId, $"theQuatBot is now connected to {e.Guild.Name}({e.Guild.Id})");
+            //read the prefixes json and then read (not needed right now, as only one main prefix at hand)
             return Task.CompletedTask;
         }
 
         //client error exception logging
-        private Task client_ClientError(ClientErrorEventArgs e)
+        private Task client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
         {
-            e.Client.DebugLogger.LogMessage(LogLevel.Error, "TheQuatBot", $"big oopsie [Type: {e.Exception.GetType()}] [{e.Exception.Message}]", DateTime.Now);
+            sender.Logger.LogError(BotEventId, $"big oopsie [Type: {e.Exception.GetType()}] [{e.Exception.Message}]");
             return Task.CompletedTask;
         }
 
         //command executed log
-        private Task Command_CommandExecuted(CommandExecutionEventArgs e)
+        private Task Command_CommandExecuted(CommandsNextExtension cnext, CommandExecutionEventArgs e)
         {
-            e.Context.Client.DebugLogger.LogMessage(LogLevel.Info, "TheQuatBot", $"Hoe {e.Context.User.Username} successfully executed {e.Command.Name}", DateTime.Now);
+            cnext.Client.Logger.LogInformation(BotEventId, $"Hoe {e.Context.User.Username} successfully executed {e.Command.QualifiedName}");
             return Task.CompletedTask;
         }
 
         //command error log
-        private async Task Command_CommandError(CommandErrorEventArgs e)
+        private async Task Command_CommandError(CommandsNextExtension cnext, CommandErrorEventArgs e)
         {
-            e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "TheQuatBot", $"{e.Context.User.Username} tried to do'{e.Context.Message}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"} | {e.Exception.StackTrace}", DateTime.Now);
+            cnext.Client.Logger.LogWarning(BotEventId, $"{e.Context.User.Username} tried to do'{e.Context.Message}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"} | {e.Exception.StackTrace}");
 
             //if it's lack of perms
             if (e.Exception is ChecksFailedException ex)
@@ -131,7 +124,9 @@ namespace TheQuatBot
                     Description = $"{emoji} You do not have the permissions required to execute this command.",
                     Color =  DiscordColor.DarkRed // red
                 };
-                await e.Context.RespondAsync("", embed: embed).ConfigureAwait(false);
+                var msg = await e.Context.RespondAsync("", embed: embed).ConfigureAwait(false);
+                await Task.Delay(4000);
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
 
             //if it's due to wrong argument implementation
@@ -145,7 +140,9 @@ namespace TheQuatBot
                     Description = $"{emoji} Arguments error; Please check q!help <cmd> for proper usage",
                     Color = DiscordColor.DarkRed
                 };
-                await e.Context.RespondAsync("", embed: embed).ConfigureAwait(false);
+                var msg = await e.Context.RespondAsync("", embed: embed).ConfigureAwait(false);
+                await Task.Delay(4000);
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
 
             //if it's due to unknown cmd
@@ -159,7 +156,9 @@ namespace TheQuatBot
                     Description = $"{emoji} command does not exist in context [lmao] try q!help",
                     Color = DiscordColor.DarkRed
                 };
-                await e.Context.RespondAsync("",embed: embed).ConfigureAwait(false);
+                var msg = await e.Context.RespondAsync("",embed: embed).ConfigureAwait(false);
+                await Task.Delay(4000);
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
         }
     }
