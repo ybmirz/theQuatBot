@@ -19,6 +19,7 @@ There's quite a few random commands that are an inside joke to the group, but it
 - `kanye` - returns a kanye quote taken from <https://kanye.rest/>
 - `uptime` - returns uptime of bot,, more specifically uptime of console line running
 - `purge` - self-explanatory,, deletes the intended amnt of msgs in a channel
+- `wallhaven` - wallhaven cmd group to return a set of wallpapers preview from the [Wallhaven API](https://wallhaven.cc/help/api), with thanks to [WallpaperSharp Wrapper](https://github.com/realTobby/WallpaperSharp)
 
 Expect more commands to come cos it's been fun making this for me friends, along the lines of more API calling and creating inside jokes commands,, like `stophorny` cmd to stop us being horny. Will add more stuff like having birthdays of the bois set up and saved in a json.
 
