@@ -461,7 +461,7 @@ namespace TheQuatBot.Commands
             {
                 Title = "Uptime",
                 Color = DiscordColor.DarkGreen,
-                Description = $"{timeSpan.Hours} Hours {timeSpan.Minutes} Minutes { timeSpan.Seconds } Seconds"
+                Description = $"{timeSpan.Days} Days {timeSpan.Hours} Hours {timeSpan.Minutes} Minutes { timeSpan.Seconds } Seconds"
             }.WithFooter($"Ping {ctx.Client.Ping} ms {emoji}");
 
             await ctx.RespondAsync(embed: embed).ConfigureAwait(false);

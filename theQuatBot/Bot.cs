@@ -22,13 +22,13 @@ namespace TheQuatBot
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
-        
-        public async Task RunAsync()
+
+        public Bot(IServiceProvider services)
         {
             var json = string.Empty;
             using (var fs = File.OpenRead("config.json")) // config json containing token and prefix is put in the debug folder
             using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
-                json = await sr.ReadToEndAsync().ConfigureAwait(false);
+                json = sr.ReadToEnd();
 
             var configJson = JsonConvert.DeserializeObject<ConfigJson>(json);
 
@@ -37,7 +37,7 @@ namespace TheQuatBot
                 Token = configJson.Token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                MinimumLogLevel =LogLevel.Warning
+                MinimumLogLevel = LogLevel.Warning
             };
 
             Client = new DiscordClient(config);
@@ -54,7 +54,8 @@ namespace TheQuatBot
                 EnableMentionPrefix = false,
                 EnableDefaultHelp = true, // make your own help in abit
                 DmHelp = false,
-                CaseSensitive = false
+                CaseSensitive = false,
+                Services = services
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
@@ -69,13 +70,11 @@ namespace TheQuatBot
             Commands.RegisterCommands<WallhavenCmds>();
 
             Interactivity = Client.UseInteractivity(new InteractivityConfiguration
-            { 
+            {
                 PaginationBehaviour = PaginationBehaviour.Ignore,
                 Timeout = TimeSpan.FromSeconds(60)
             });
-
-            await Client.ConnectAsync();
-            await Task.Delay(-1);
+             Client.ConnectAsync();
         }
 
         //client is ready
