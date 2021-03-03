@@ -68,6 +68,7 @@ namespace TheQuatBot
             Commands.RegisterCommands<TryCommands>();
             Commands.RegisterCommands<hornycmds>();
             Commands.RegisterCommands<WallhavenCmds>();
+            Commands.RegisterCommands<ResinCmnds>();
 
             Interactivity = Client.UseInteractivity(new InteractivityConfiguration
             {

@@ -16,6 +16,7 @@ namespace TheQuatBot
             {
                 options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=ResinDbContext;Trusted_Connection=True;MultipleActiveResultSets=true",
                     x => x.MigrationsAssembly("theQuatBot.DAL.Migrations"));
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
             var serviceProvider = services.BuildServiceProvider();
             var bot = new Bot(serviceProvider);
