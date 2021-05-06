@@ -339,3 +339,4 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /theQuatBot/config.json
+/theQuatBot/Resources/walroos-bot-data-firebase-adminsdk.json

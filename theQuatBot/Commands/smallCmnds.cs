@@ -17,11 +17,9 @@ namespace TheQuatBot.Commands
     {
         public static DateTime startTime;
     }
-    
-
     public class TryCommands : BaseCommandModule
     {
-        
+
         [Command("ping"), Description("Why tf do you want to ping me")]
         public async Task Ping(CommandContext ctx)
         {
@@ -64,7 +62,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("slap"), Description("Simple slap command, returns a slap img")]
-        public async Task Slap(CommandContext ctx, [Description("who you'd like to slap ID or discord mention")] DiscordMember user, [Description("[Optional] Message to be sent with the slap (with _ as spaces)")] [RemainingText] string msg = null)
+        public async Task Slap(CommandContext ctx, [Description("who you'd like to slap ID or discord mention")] DiscordMember user, [Description("[Optional] Message to be sent with the slap (with _ as spaces)")][RemainingText] string msg = null)
         {
             DiscordMember member = user; //will output executor if code doesnt work
             await ctx.TriggerTypingAsync();
@@ -99,7 +97,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("summon"), Description("Summons unholy and holy things and people")]
-        public async Task whois(CommandContext ctx,[RemainingText] [Description("Current arguments possible: [owner] [fion] [milo] [macy] [lil_pip]")] string args)
+        public async Task whois(CommandContext ctx, [RemainingText][Description("Current arguments possible: [owner] [fion] [milo] [macy] [lil_pip]")] string args)
         {
             switch (args)
             {
@@ -134,7 +132,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("annoy"), Description("A cmd to annoy the fuk out of someone by mass pinging, also it returns one less then wanted so like just remember that im not bothered to fix it")]
-        public async Task annoy(CommandContext ctx, [Description("The member you wanna annoy [UID of Discord User or @[user]]")] DiscordMember member, [Description("The amount of times you wanna ping em [+1]")] int num = 0, [RemainingText,Description("Optional msg to be added with the ping [RemainingText]")] string msg = null)
+        public async Task annoy(CommandContext ctx, [Description("The member you wanna annoy [UID of Discord User or @[user]]")] DiscordMember member, [Description("The amount of times you wanna ping em [+1]")] int num = 0, [RemainingText, Description("Optional msg to be added with the ping [RemainingText]")] string msg = null)
         {
             //DiscordMember member = null;
             if (num != 0) //makes sure a number is inputted
@@ -234,7 +232,7 @@ namespace TheQuatBot.Commands
 
         [Command("say"), Description("The bot will repeat whatever you say, and deletes the cmnd msg [Usage: q!say [what you want to say]] if there is an @, reply with a username you'd like to mention")]
         [RequireRoles(RoleCheckMode.Any, "bot dictator")]
-        public async Task say(CommandContext ctx, [RemainingText] [Description("The msg you want the bot to repeat")] string str)
+        public async Task say(CommandContext ctx, [RemainingText][Description("The msg you want the bot to repeat")] string str)
         {
             if (str != null)
             {
@@ -252,7 +250,7 @@ namespace TheQuatBot.Commands
 
         [Command("sayto"), Description("The bot will repeat what you say but to a specified channel")]
         [RequireRoles(RoleCheckMode.Any, "bot dictator")]
-        public async Task sayto(CommandContext ctx, [Description("The channel you want to send the msg to")]DiscordChannel chnl, [RemainingText] [Description("Message to be repeated")]string str = null)
+        public async Task sayto(CommandContext ctx, [Description("The channel you want to send the msg to")] DiscordChannel chnl, [RemainingText][Description("Message to be repeated")] string str = null)
         {
             if (str != null)
             {
@@ -261,7 +259,7 @@ namespace TheQuatBot.Commands
             }
             else
             {
-                var botmsg = await ctx.Channel.SendMessageAsync( "What do you want me to say goddamnit :face_with_symbols_over_mouth:");
+                var botmsg = await ctx.Channel.SendMessageAsync("What do you want me to say goddamnit :face_with_symbols_over_mouth:");
                 Thread.Sleep(2000);
                 await ctx.Channel.DeleteMessageAsync(botmsg);
             }
@@ -270,7 +268,7 @@ namespace TheQuatBot.Commands
 
         [Command("8ball"), Description("Asking the magic 8ball life questions [Not Responsible for any improper decisions taken from this]")]
         [Aliases("8")]
-        public async Task ball(CommandContext ctx,[RemainingText] string args = null)
+        public async Task ball(CommandContext ctx, [RemainingText] string args = null)
         {
             var sb = new StringBuilder();
             var embed = new DiscordEmbedBuilder();
@@ -328,7 +326,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("rps"), Description("Rock Paper Scissors Simple Game")]
-        public async Task rps(CommandContext ctx, [RemainingText,Description("Input your choice here [rock/paper/scissors]")] string args = null)
+        public async Task rps(CommandContext ctx, [RemainingText, Description("Input your choice here [rock/paper/scissors]")] string args = null)
         {
             if (args == null) {
                 var embed = new DiscordEmbedBuilder();
@@ -376,18 +374,18 @@ namespace TheQuatBot.Commands
                 resultEmbed.Description = resultSb.ToString();
 
 
-                    switch (rpsFight(args, choices[n]))
-                    {
-                        case 0:
-                            resultEmbed.Color = DiscordColor.Green;
-                            break;
-                        case 1:
-                            resultEmbed.Color = DiscordColor.Cyan;
-                            break;
-                        case 2:
-                            resultEmbed.Color = DiscordColor.Red;
-                            break;
-                    }
+                switch (rpsFight(args, choices[n]))
+                {
+                    case 0:
+                        resultEmbed.Color = DiscordColor.Green;
+                        break;
+                    case 1:
+                        resultEmbed.Color = DiscordColor.Cyan;
+                        break;
+                    case 2:
+                        resultEmbed.Color = DiscordColor.Red;
+                        break;
+                }
 
                 await ctx.Channel.SendMessageAsync(embed: resultEmbed.Build()).ConfigureAwait(false);
             }
@@ -436,7 +434,7 @@ namespace TheQuatBot.Commands
         public async Task kanye(CommandContext ctx)
         {
             string quote = KanyeService.GetQuote();
-            var embedThumbnail = new DiscordEmbedBuilder.EmbedThumbnail { Url = "https://i.pinimg.com/originals/c1/3b/38/c13b38fb73c16f27463f39e4dd6e9d15.jpg", Width = 150, Height =150 };
+            var embedThumbnail = new DiscordEmbedBuilder.EmbedThumbnail { Url = "https://i.pinimg.com/originals/c1/3b/38/c13b38fb73c16f27463f39e4dd6e9d15.jpg", Width = 150, Height = 150 };
             var embedFooter = new DiscordEmbedBuilder.EmbedFooter { Text = "Taken from api.kanye.rest" };
             var color = DiscordColor.Brown;
 
@@ -455,8 +453,8 @@ namespace TheQuatBot.Commands
         [Command("uptime"), Description("Returns uptime of the bot")]
         public async Task uptime(CommandContext ctx)
         {
-            var timeSpan = DateTime.Now - Globals.startTime;
-            var emoji = DiscordEmoji.FromName(ctx.Client,":gem:");
+            var timeSpan = DateTime.Now - GlobalData.startTime;
+            var emoji = DiscordEmoji.FromName(ctx.Client, ":gem:");
             var embed = new DiscordEmbedBuilder
             {
                 Title = "Uptime",
@@ -477,11 +475,34 @@ namespace TheQuatBot.Commands
         }
 
         [Command("choose"), Description("Gives you a somewhat random choice between the words you specify (separated by spaces)")]
-        public async Task Random(CommandContext ctx, [RemainingText, Description("The word choices arguments separated by spaces.")]string input)
+        public async Task Random(CommandContext ctx, [RemainingText, Description("The word choices arguments separated by spaces.")] string input)
         {
             Random rnd = new Random();
             var inputs = input.Split(" ");
             await ctx.Channel.SendMessageAsync($"I have chosen **{inputs[rnd.Next(0, inputs.Length)]}**.").ConfigureAwait(false);
+        }
+
+        [Command("getquatinvites"), Description("Gets the quat server invites")]
+        [Hidden]
+        public async Task quatInv(CommandContext ctx)
+        {
+            var guilds = ctx.Client.Guilds;
+            if (guilds.ContainsKey(695909498430160996))
+            {
+                DiscordGuild quat = guilds.GetValueOrDefault<ulong,DiscordGuild>(695909498430160996);
+                var invites = await quat.GetInvitesAsync();
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("The following are the invite codes, please try them");
+                foreach (var invite in invites)
+                {
+                    if (!invite.IsRevoked)
+                        sb.AppendLine(invite.Code);
+                }
+                await ctx.RespondAsync(sb.ToString()).ConfigureAwait(false);
+            }
+            else
+                await ctx.RespondAsync("Sorry the server is unavailable right now").ConfigureAwait(false);
         }
     }
 }

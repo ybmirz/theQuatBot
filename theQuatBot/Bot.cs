@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -13,6 +14,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using TheQuatBot.Commands;
+using TheQuatBot.Services;
 
 namespace TheQuatBot
 {
@@ -37,7 +39,7 @@ namespace TheQuatBot
                 Token = configJson.Token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                MinimumLogLevel = LogLevel.Warning
+                MinimumLogLevel = LogLevel.Debug,                
             };
 
             Client = new DiscordClient(config);
@@ -50,12 +52,12 @@ namespace TheQuatBot
             var commandsConfig = new CommandsNextConfiguration
             {
                 StringPrefixes = new string[] { configJson.Prefix },
-                EnableDms = false, // to avoid confusion
+                EnableDms = true,
                 EnableMentionPrefix = false,
                 EnableDefaultHelp = true, // make your own help in abit
                 DmHelp = false,
-                CaseSensitive = false,
-                Services = services
+                CaseSensitive = false,                
+                Services = services                                
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
@@ -81,7 +83,7 @@ namespace TheQuatBot
         //client is ready
         private Task OnClientReady(DiscordClient client, ReadyEventArgs e)
         {
-            Globals.startTime = DateTime.Now;
+            GlobalData.startTime = DateTime.Now;
             client.Logger.LogInformation(BotEventId, $"This bot is ready now bitches Shard: {client.ShardId}");
             return Task.CompletedTask;
         }
