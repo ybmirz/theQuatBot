@@ -5,19 +5,19 @@ using System.Collections.Generic;
 namespace TheQuatBot.Services.API_Services
 {
     [FirestoreData]
-    public partial class ResinModel
+    public partial class BirthdayModel
     {
         [FirestoreProperty]
         public ulong DiscordID { get; set; }
         [FirestoreProperty]
-        public int ResinAmnt { get; set; }
+        public Timestamp BirthDate { get; set; }
         [FirestoreProperty]
-        public Timestamp LastUpdated { get; set; }
+        public string username { get; set; }
         [FirestoreProperty]
-        public ulong guildId { get; set; }
+        public string nickname { get; set; }
         [FirestoreProperty]
-        public bool CapReminder { get; set; } = false;
+        public string message { get; set; }
         [FirestoreProperty]
-        public int RemindAt { get; set; } 
+        public int birthYear { get; set; } = 0;
     }
 }

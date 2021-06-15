@@ -66,6 +66,7 @@ namespace TheQuatBot
             Commands.CommandExecuted += Command_CommandExecuted;
             Commands.CommandErrored += Command_CommandError;
 
+            Commands.RegisterCommands<BirthdayCmds>();
             Commands.RegisterCommands<RemindCmds>();
             Commands.RegisterCommands<TryCommands>();
             Commands.RegisterCommands<hornycmds>();
@@ -81,11 +82,13 @@ namespace TheQuatBot
         }
 
         //client is ready
-        private Task OnClientReady(DiscordClient client, ReadyEventArgs e)
+        private async Task OnClientReady(DiscordClient client, ReadyEventArgs e)
         {
+            GlobalData.globalClient = client;
             GlobalData.startTime = DateTime.Now;
+            GlobalData.birthdayAnnounceChannel = await client.GetChannelAsync(695909498430160999).ConfigureAwait(false); // defaults to quarantine chat
             client.Logger.LogInformation(BotEventId, $"This bot is ready now bitches Shard: {client.ShardId}");
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
         //guild connect log

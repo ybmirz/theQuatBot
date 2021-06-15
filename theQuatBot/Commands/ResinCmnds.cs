@@ -78,12 +78,13 @@ namespace TheQuatBot.Commands
                 }
                 else
                 {
-                    var resinUser = new ResinModel()
-                    {
-                        DiscordID = ctx.User.Id,
-                        guildId = ctx.Guild.Id,
-                        ResinAmnt = resin,
-                        LastUpdated = Timestamp.FromDateTime(DateTime.UtcNow)
+                     var resinUser = new ResinModel()
+                     {
+                    DiscordID = ctx.User.Id,
+                    guildId = ctx.Guild.Id,
+                    ResinAmnt = resin,
+                    LastUpdated = Timestamp.FromDateTime(DateTime.UtcNow),
+                    RemindAt = int.MinValue
                     };
                     resinModel = resinUser;
                     await docRef.CreateAsync(resinUser);
@@ -125,7 +126,7 @@ namespace TheQuatBot.Commands
         }
 
         [Command("remind"), Description("Sets whether the user wants to be reminded when their resin is capped. Call to enable or disable")]
-        public async Task remind(CommandContext ctx)
+        public async Task remind(CommandContext ctx,[Description("Amount of resin you'd like to be reminded at")] int AmountResin = 160)
         {
             DocumentReference docRef = GlobalData.database.Collection("Resin").Document(ctx.User.Id.ToString());
             DocumentSnapshot docSnap = await docRef.GetSnapshotAsync().ConfigureAwait(false);
@@ -133,18 +134,20 @@ namespace TheQuatBot.Commands
             if (docSnap.Exists)
             {
                 var resinUser = docSnap.ConvertTo<ResinModel>();
-                resinUser.CapReminder = !resinUser.CapReminder;
-                await docRef.SetAsync(resinUser).ConfigureAwait(false);
+                resinUser.CapReminder = !resinUser.CapReminder;                
                 if (resinUser.CapReminder)
                 {
+                    resinUser.RemindAt = AmountResin;
                     GlobalData.CapReminderContext.Add(ctx.User.Id, ctx);
-                    await ctx.RespondAsync($"You will now **be reminded** when your resin caps.").ConfigureAwait(false);
+                    await ctx.RespondAsync($"You will now **be reminded** when your resin caps. You will be reminded at **{AmountResin}** resin.").ConfigureAwait(false);
                 }
                 else
                 {
+                    resinUser.RemindAt = int.MinValue;
                     GlobalData.CapReminderContext.Remove(ctx.User.Id);
                     await ctx.RespondAsync($"You will now **not be reminded** when your resin caps.").ConfigureAwait(false);
                 }
+                await docRef.SetAsync(resinUser).ConfigureAwait(false);
             }
             else
             { await ctx.RespondAsync("It seems you're not in the database, please do `q!resin set [amount]` first and try again.").ConfigureAwait(false); }
@@ -152,11 +155,16 @@ namespace TheQuatBot.Commands
 
         private static async Task NotifyUser(ulong userId)
         {
-            var ctx = GlobalData.CapReminderContext[userId];
-            await ctx.RespondAsync($"{ctx.User.Mention}, your resin has capped! Go use it before it overflows!").ConfigureAwait(false);
+            try
+            {
+                var ctx = GlobalData.CapReminderContext[userId];
+                await ctx.Channel.SendMessageAsync($"{ctx.User.Mention}, your resin has capped! Go use it before it overflows!").ConfigureAwait(false);
+            }
+            catch (Exception e)
+            { Console.WriteLine($"Oopsie resin reminder failed for user {userId}.Exception: {e.Message} {e.StackTrace}"); }
         }
 
-        private static async void UpdateResinEvent(object source, ElapsedEventArgs e, DocumentReference docRef)
+        public static async void UpdateResinEvent(object source, ElapsedEventArgs e, DocumentReference docRef)
         {
             var snap = await docRef.GetSnapshotAsync().ConfigureAwait(false);
             var resinUser = snap.ConvertTo<ResinModel>();
@@ -168,11 +176,13 @@ namespace TheQuatBot.Commands
                 resinUser.ResinAmnt = 0;
 
             // Notifies the user when their resin caps, and if they choose to be reminded or not.
-            if (resinUser.ResinAmnt == 160)
+            if (resinUser.ResinAmnt == resinUser.RemindAt)
             {
                 if (resinUser.CapReminder)
                 {
                     await NotifyUser(resinUser.DiscordID);
+                    resinUser.CapReminder = false; // SO IT ONLY REMINDS ONCE LOL
+                    GlobalData.CapReminderContext.Remove(resinUser.DiscordID); // deletes the context needed
                 }
             }
 

@@ -1,10 +1,12 @@
 
+using DSharpPlus.Entities;
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Timers;
+using TheQuatBot.Commands;
 using TheQuatBot.Services;
 using TheQuatBot.Services.API_Services;
 
@@ -12,6 +14,7 @@ namespace TheQuatBot
 {
     public class Startup
     {
+        private static Clock _c;
         public void ConfigureServices(IServiceCollection services)
         {
             // connecting to the firestore database
@@ -39,39 +42,58 @@ namespace TheQuatBot
                 var docRef = docSnap.Reference;
                 var resinUser = docSnap.ConvertTo<ResinModel>();
                 var aTimer = new Timer(480000);
-                aTimer.Elapsed += (source, e) => UpdateResinEvent(source, e, docRef);
+                aTimer.Elapsed += (source, e) => ResinCmnds.UpdateResinEvent(source, e, docRef);
                 aTimer.AutoReset = true;
                 aTimer.Start();
                 Console.WriteLine($"Resin Timer for {resinUser.DiscordID} started!");
                 GlobalData.timers.Add(resinUser.DiscordID, aTimer);
             }
+
+            // Start Birthday Clock
+            _c = new Clock();
+            _c.NewDay += C_NewDay;
         }
-        
+
+        private async static void C_NewDay(object sender, EventArgs e)
+        {
+            Console.WriteLine("Daily birthday check!");
+            Query birthdayRefs = GlobalData.database.Collection("Birthdays");
+            QuerySnapshot birthdaySnaps = await birthdayRefs.GetSnapshotAsync();
+            foreach (DocumentSnapshot birthdaySnap in birthdaySnaps)
+            {
+                var birthday = birthdaySnap.ConvertTo<BirthdayModel>();
+                if (birthday.BirthDate.ToDateTime().Date == DateTime.UtcNow.Date) // It's someone's birthday today!
+                {
+                    Console.WriteLine($"It's {birthday.username}'s Birthday today!");
+                    var user = await GlobalData.globalClient.GetUserAsync(birthday.DiscordID).ConfigureAwait(false);
+                    var msg = " ";
+                    if (birthday.birthYear != 0)
+                        msg = $" They're now **{DateTime.UtcNow.Year - birthday.birthYear}** years old! \n";
+                    await GlobalData.birthdayAnnounceChannel.SendMessageAsync($"Hey @everyone, it's {user.Mention}'s birthday today!\n{msg}Special message: `{birthday.message}` :partying_face: :tada: :confetti_ball: :tada:").ConfigureAwait(false);
+                }
+
+                // Checks to see if need to update the year on the birtdate
+                var localBirthDate = birthday.BirthDate.ToDateTime().ToLocalTime();
+                if (DateTime.Now.Year > localBirthDate.Year)
+                {
+                    birthday.BirthDate = Timestamp.FromDateTime(new DateTime(DateTime.UtcNow.Year, localBirthDate.Month,localBirthDate.Day,0,0,0,DateTimeKind.Utc));
+                    var birthdayRef = birthdaySnap.Reference;
+                    await birthdayRef.SetAsync(birthday);                    
+                    Console.WriteLine("Birthdate's year has been updated!");
+                }
+            }
+        }
+
         // When the bot is closing up
-        static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             foreach (var timer in GlobalData.timers.Values)
             {
                 timer.Stop();
                 timer.Dispose();
             }
-            Console.WriteLine("Timer disposed!");
-        }
-
-        private static async void UpdateResinEvent(object source, ElapsedEventArgs e, DocumentReference docRef)
-        {
-            var snap = await docRef.GetSnapshotAsync().ConfigureAwait(false);
-            var resinUser = snap.ConvertTo<ResinModel>();
-
-            resinUser.ResinAmnt++;
-            if (resinUser.ResinAmnt > 160)
-                resinUser.ResinAmnt = 160;
-            if (resinUser.ResinAmnt < 0)
-                resinUser.ResinAmnt = 0;
-
-            resinUser.LastUpdated = Timestamp.FromDateTime(DateTime.UtcNow);
-            Console.WriteLine($"Resin for {resinUser.DiscordID} added! at {DateTime.UtcNow}");
-            await docRef.SetAsync(resinUser);
+            _c.Dispose();
+            Console.WriteLine("Timer(s) disposed!");
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

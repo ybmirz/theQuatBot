@@ -231,7 +231,6 @@ namespace TheQuatBot.Commands
         }
 
         [Command("say"), Description("The bot will repeat whatever you say, and deletes the cmnd msg [Usage: q!say [what you want to say]] if there is an @, reply with a username you'd like to mention")]
-        [RequireRoles(RoleCheckMode.Any, "bot dictator")]
         public async Task say(CommandContext ctx, [RemainingText][Description("The msg you want the bot to repeat")] string str)
         {
             if (str != null)
