@@ -153,15 +153,18 @@ namespace TheQuatBot.Commands
             { await ctx.RespondAsync("It seems you're not in the database, please do `q!resin set [amount]` first and try again.").ConfigureAwait(false); }
         }
 
-        private static async Task NotifyUser(ulong userId)
+        private static async Task NotifyUser(ResinModel resinUser)
         {
             try
             {
-                var ctx = GlobalData.CapReminderContext[userId];
-                await ctx.Channel.SendMessageAsync($"{ctx.User.Mention}, your resin has capped! Go use it before it overflows!").ConfigureAwait(false);
+                var ctx = GlobalData.CapReminderContext[resinUser.DiscordID];
+                if (resinUser.RemindAt == 160)
+                    await ctx.Channel.SendMessageAsync($"{ctx.User.Mention}, your resin has capped at {resinUser.RemindAt}. Go grind ya khara, before it overflows!").ConfigureAwait(false);
+                else
+                    await ctx.Channel.SendMessageAsync($"{ctx.User.Mention}, your resin has reached {resinUser.RemindAt}. Make sure to use it, and re-remind for the next session").ConfigureAwait(false);
             }
             catch (Exception e)
-            { Console.WriteLine($"Oopsie resin reminder failed for user {userId}.Exception: {e.Message} {e.StackTrace}"); }
+            { Console.WriteLine($"Oopsie resin reminder failed for user {resinUser.DiscordID}.Exception: {e.Message} {e.StackTrace}"); }
         }
 
         public static async void UpdateResinEvent(object source, ElapsedEventArgs e, DocumentReference docRef)
@@ -180,7 +183,7 @@ namespace TheQuatBot.Commands
             {
                 if (resinUser.CapReminder)
                 {
-                    await NotifyUser(resinUser.DiscordID);
+                    await NotifyUser(resinUser);
                     resinUser.CapReminder = false; // SO IT ONLY REMINDS ONCE LOL
                     GlobalData.CapReminderContext.Remove(resinUser.DiscordID); // deletes the context needed
                 }
